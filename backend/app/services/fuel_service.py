@@ -1,16 +1,13 @@
 from app.services.gas_api import get_gas_prices
 
 
-def calculate_recommendation(mpg: float, gallons: float, start: str, destination: str):
+def calculate_recommendation(mpg, gallons, start, destination):
     stations = get_gas_prices(start, destination)
 
     results = []
 
     for station in stations:
-        fuel_cost = station["price"] * gallons
-        extra_gallons = station["detour_miles"] / mpg
-        extra_cost = extra_gallons * station["price"]
-        total_cost = fuel_cost + extra_cost
+        total_cost = station["price"] * gallons + (station["detour_miles"] * 0.1)
 
         results.append({
             "name": station["name"],
@@ -24,8 +21,16 @@ def calculate_recommendation(mpg: float, gallons: float, start: str, destination
     most_convenient = min(results, key=lambda x: x["detour_miles"])
 
     return {
+        "route": {
+            "start": start,
+            "destination": destination
+        },
+        "inputs": {
+            "mpg": mpg,
+            "gallons": gallons
+        },
         "best_value": best_value,
         "cheapest": cheapest,
         "most_convenient": most_convenient,
-        "all_options": sorted(results, key=lambda x: x["total_cost"])
+        "all_options": results
     }

@@ -1,138 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Fuel Optimizer</title>
+  <meta charset="UTF-8">
+  <title>Fuel Optimizer</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f5f5f5;
-        }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f5f5f5;
+    }
 
-        h1 {
-            color: #333;
-        }
+    h1 {
+      margin-bottom: 20px;
+    }
 
-        input {
-            padding: 10px;
-            margin: 5px;
-            width: 200px;
-        }
+    input {
+      padding: 10px;
+      margin-right: 10px;
+      width: 180px;
+    }
 
-        button {
-            padding: 10px 20px;
-            background-color: black;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+    button {
+      padding: 10px 20px;
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
 
-        button:hover {
-            background-color: #333;
-        }
+    .cards {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+    }
 
-        .cards {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
+    .card {
+      padding: 20px;
+      border-radius: 10px;
+      width: 250px;
+      background: white;
+      border: 2px solid #ddd;
+    }
 
-        .card {
-            padding: 15px;
-            width: 220px;
-            border-radius: 10px;
-            background-color: white;
-        }
+    .best { border-color: green; }
+    .cheap { border-color: blue; }
+    .fast { border-color: orange; }
 
-        .best {
-            border: 2px solid green;
-        }
+    #map {
+      height: 300px;
+      margin-top: 30px;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-weight: bold;
+    }
 
-        .cheap {
-            border: 2px solid blue;
-        }
-
-        .fast {
-            border: 2px solid orange;
-        }
-
-        .list-item {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-top: 10px;
-            background-color: white;
-        }
-    </style>
+    .options {
+      margin-top: 30px;
+    }
+  </style>
 </head>
 
 <body>
 
-    <h1>🚗 Fuel Optimizer</h1>
+<h1>🚗 Fuel Optimizer</h1>
 
-    <input id="start" placeholder="Start (Phoenix)">
-    <input id="destination" placeholder="Destination (LA)">
-    <input id="mpg" placeholder="MPG (default 25)">
-    <input id="gallons" placeholder="Gallons (default 10)">
+<!-- ✅ FIXED: default values added -->
+<input id="start" value="phoenix">
+<input id="destination" value="la">
+<input id="mpg" value="25">
+<input id="gallons" value="10">
 
-    <br><br>
+<br><br>
 
-    <button onclick="getRecommendation()">Get Recommendation</button>
+<button onclick="getRecommendation()">Get Recommendation</button>
 
-    <div id="result"></div>
+<h2 id="route"></h2>
 
-    <script>
-        async function getRecommendation() {
-            const start = document.getElementById("start").value;
-            const destination = document.getElementById("destination").value;
-            const mpg = document.getElementById("mpg").value || 25;
-            const gallons = document.getElementById("gallons").value || 10;
+<div class="cards">
+  <div class="card best" id="best"></div>
+  <div class="card cheap" id="cheap"></div>
+  <div class="card fast" id="fast"></div>
+</div>
 
-            const url = `http://127.0.0.1:8000/recommendation?start=${start}&destination=${destination}&mpg=${mpg}&gallons=${gallons}`;
+<!-- Map placeholder -->
+<div id="map">
+  <h3>🗺 Route Visualization</h3>
+  <p id="mapText">Enter locations and click button</p>
+</div>
 
-            const res = await fetch(url);
-            const data = await res.json();
+<!-- All options -->
+<div class="options">
+  <h3>All Options</h3>
+  <div id="options"></div>
+</div>
 
-            displayResults(data);
-        }
+<script>
+async function getRecommendation() {
+  const start = document.getElementById("start").value;
+  const destination = document.getElementById("destination").value;
 
-        function displayResults(data) {
-            const container = document.getElementById("result");
+  // ✅ FIX: fallback values
+  const mpg = document.getElementById("mpg").value || 25;
+  const gallons = document.getElementById("gallons").value || 10;
 
-            container.innerHTML = `
-                <h2>Route: ${data.route.start} → ${data.route.destination}</h2>
+  const url = `http://127.0.0.1:8000/recommendation?start=${start}&destination=${destination}&mpg=${mpg}&gallons=${gallons}`;
 
-                <div class="cards">
-                    ${createCard("⭐ Best Value", data.best_value, "best")}
-                    ${createCard("💰 Cheapest", data.cheapest, "cheap")}
-                    ${createCard("🚗 Most Convenient", data.most_convenient, "fast")}
-                </div>
+  console.log("Calling API:", url);
 
-                <h3 style="margin-top:30px;">All Options</h3>
+  try {
+    const res = await fetch(url);
 
-                ${data.all_options.map(station => `
-                    <div class="list-item">
-                        <b>${station.name}</b><br>
-                        Price: $${station.price}<br>
-                        Detour: ${station.detour_miles} mi<br>
-                        Total Cost: $${station.total_cost}
-                    </div>
-                `).join("")}
-            `;
-        }
+    // ✅ Handle API errors
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("API Error:", errText);
+      alert("API Error: " + res.status);
+      return;
+    }
 
-        function createCard(title, station, className) {
-            return `
-                <div class="card ${className}">
-                    <h3>${title}</h3>
-                    <p><b>${station.name}</b></p>
-                    <p>Price: $${station.price}</p>
-                    <p>Detour: ${station.detour_miles} mi</p>
-                    <p>Total Cost: $${station.total_cost}</p>
-                </div>
-            `;
-        }
-    </script>
+    const data = await res.json();
+    console.log("DATA:", data);
+
+    // ✅ Route
+    document.getElementById("route").innerText =
+      `Route: ${data.route.start} → ${data.route.destination}`;
+
+    // ✅ Cards
+    document.getElementById("best").innerHTML = `
+      ⭐ <b>Best Value</b><br><br>
+      ${data.best_value.name}<br>
+      Price: $${data.best_value.price}<br>
+      Detour: ${data.best_value.detour_miles} mi<br>
+      Total: $${data.best_value.total_cost}
+    `;
+
+    document.getElementById("cheap").innerHTML = `
+      💰 <b>Cheapest</b><br><br>
+      ${data.cheapest.name}<br>
+      Price: $${data.cheapest.price}<br>
+      Detour: ${data.cheapest.detour_miles} mi<br>
+      Total: $${data.cheapest.total_cost}
+    `;
+
+    document.getElementById("fast").innerHTML = `
+      🚗 <b>Most Convenient</b><br><br>
+      ${data.most_convenient.name}<br>
+      Price: $${data.most_convenient.price}<br>
+      Detour: ${data.most_convenient.detour_miles} mi<br>
+      Total: $${data.most_convenient.total_cost}
+    `;
+
+    // ✅ Map text update (better UX)
+    document.getElementById("mapText").innerText =
+      `Driving from ${data.route.start} → ${data.route.destination}
+Best stop: ${data.best_value.name}
+Estimated total cost: $${data.best_value.total_cost}`;
+
+    // ✅ All options list
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+
+    data.all_options.forEach(opt => {
+      optionsDiv.innerHTML += `
+        <div style="background:white; padding:10px; margin:10px 0;">
+          <b>${opt.name}</b><br>
+          Price: $${opt.price}<br>
+          Detour: ${opt.detour_miles} mi<br>
+          Total: $${opt.total_cost}
+        </div>
+      `;
+    });
+
+  } catch (err) {
+    console.error("Fetch failed:", err);
+    alert("Frontend error. Check console.");
+  }
+}
+</script>
 
 </body>
 </html>

@@ -74,7 +74,7 @@ fuel-optimizer/
 
 ### 1. Clone Repo
 
-git clone https://github.com/YOUR_USERNAME/fuel-optimizer.git  
+git clone https://github.com/RushilManidhanJangala/fuel-optimizer.git  
 cd fuel-optimizer
 
 ---
