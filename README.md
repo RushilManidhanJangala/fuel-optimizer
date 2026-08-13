@@ -1,57 +1,157 @@
 # 🚗 Fuel Optimizer
 
-A full-stack web application that helps users find the most cost-efficient gas stations along a route by balancing fuel price and detour distance.
+A smart web app that helps users find the best gas station along a route by balancing fuel price, detour distance, and total trip cost.
+
+Instead of just showing the cheapest gas, this app answers the real question:
+
+👉 "Where should I stop to save the most money overall?"
 
 ---
 
 ## 🔥 Features
 
-- 📍 Route-based input (Start → Destination)
-- ⛽ Gas station comparison (price + detour)
-- ⭐ Smart recommendation system:
-  - Best Value (lowest total cost)
-  - Cheapest
-  - Most Convenient (lowest detour)
-- 📊 Total fuel cost calculation
-- 🌐 Full-stack architecture (FastAPI + HTML/JS)
-
----
-
-## 🛠 Tech Stack
-
-### Backend
-- FastAPI (Python)
-- REST APIs
-- Custom optimization logic
-
-### Frontend
-- HTML, CSS, JavaScript
-- Fetch API for backend communication
+- 📍 Enter Start and Destination
+- ⛽ Get fuel price options along the route
+- 🧠 Smart recommendations:
+  - ⭐ Best Value (lowest total cost)
+  - 💰 Cheapest (lowest price per gallon)
+  - 🚗 Most Convenient (least detour)
+- 📊 View all stations sorted by total cost
+- 🌐 Simple frontend UI + FastAPI backend
 
 ---
 
 ## 🧠 How It Works
 
-1. User enters start and destination
-2. Backend fetches gas station data (API / fallback)
-3. Calculates:
-   - Fuel cost
-   - Detour impact
-   - Total trip cost
-4. Returns optimized recommendations
-5. UI displays results in card format
+Total Cost = Fuel Cost + Detour Cost
+
+Where:
+- Fuel Cost = price × gallons
+- Detour Cost = (detour miles ÷ MPG) × price
+
+Then:
+- Best Value → lowest total cost
+- Cheapest → lowest price
+- Most Convenient → lowest detour
 
 ---
 
-## 🚀 Run Locally
+## 🛠️ Tech Stack
 
-### Backend
+Backend:
+- Python
+- FastAPI
+- Uvicorn
+- Requests
 
-```bash
-cd backend
-pip install -r requirements.txt
-python -m uvicorn app.main:app --reload
+Frontend:
+- HTML
+- CSS
+- JavaScript (Fetch API)
 
-## 📸 Screenshots
+---
+
+## 📁 Project Structure
+
+fuel-optimizer/
+│
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   └── services/
+│   │       ├── fuel_service.py
+│   │       └── gas_api.py
+│   ├── requirements.txt
+│
+├── frontend/
+│   ├── index.html
+│
+└── README.md
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone Repo
+
+git clone https://github.com/YOUR_USERNAME/fuel-optimizer.git  
+cd fuel-optimizer
+
+---
+
+### 2. Backend Setup
+
+cd backend  
+python -m venv venv  
+
+Activate:
+
+Windows:
+venv\Scripts\activate  
+
+Mac/Linux:
+source venv/bin/activate  
+
+Install dependencies:
+
+pip install -r requirements.txt  
+
+Run server:
+
+python -m uvicorn app.main:app --reload  
+
+Backend runs on:
+http://127.0.0.1:8000
+
+---
+
+### 3. Frontend
+
+Open:
+
+frontend/index.html
+
+in browser (double click OR right click → open with browser)
+
+---
+
+## 🔌 API Endpoint
+
+GET /recommendation
+
+Example:
+
+http://127.0.0.1:8000/recommendation?start=phoenix&destination=la&mpg=25&gallons=10
+
+---
+
+## 📸 Screenshot
 
 ![App UI](frontend/screenshot.png)
+
+---
+
+## 🚀 Future Improvements
+
+- Real gas price APIs integration
+- Google Maps route integration
+- Vehicle-based mileage optimization
+- Live traffic-aware recommendations
+- Deploy to cloud (AWS / Render)
+
+---
+
+## 💡 Why This Project?
+
+Existing apps show:
+- Cheapest gas ❌
+- Nearest gas ❌
+
+This project solves:
+👉 Total trip cost optimization ✅
+
+---
+
+## 👨‍💻 Author
+
+Rushil Manidhan Jangala
